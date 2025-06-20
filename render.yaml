@@ -1,10 +1,36 @@
-# render.yaml - Teste: Apenas o Frontend
 services:
+  # 1. Banco de Dados PostgreSQL Gratuito
+  - type: pserv
+    name: taskflow-db
+    runtime: postgres # Palavra-chave correta
+    plan: free
+
+  # 2. Backend Node.js Gratuito
+  - type: web
+    name: taskflow-backend
+    env: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile # Caminho para o Dockerfile do backend
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: taskflow-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 4000
+
+  # 3. Frontend Next.js Gratuito
   - type: web
     name: taskflow-frontend
     env: docker
     plan: free
-    dockerfilePath: ./frontend/Dockerfile
+    dockerfilePath: ./frontend/Dockerfile # Caminho para o Dockerfile do frontend
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: "https://backend-nao-existe.com" # Usando um valor temporário e inválido
+        fromService:
+          type: web
+          name: taskflow-backend
+          property: url
