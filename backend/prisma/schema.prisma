@@ -1,0 +1,59 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  done        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  group            Group?   @relation(fields: [groupId], references: [id])
+  groupId          Int?
+  fileUrl     String? 
+  originalFilename String?
+  mimeType         String? // Coluna para o tipo do arquivo 
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  role     String  @default("user") // "user" ou "admin"
+  tasks    Task[]
+  groups    GroupMember[]
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  
+  // Relações do grupo
+  members   GroupMember[]
+  tasks     Task[]
+}
+
+model GroupMember {
+  id        Int      @id @default(autoincrement())
+  role      String   @default("MEMBER") // Ex: ADMIN, MEMBER
+  status    String   @default("PENDING") // Ex: PENDING, ACCEPTED
+  
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   Int
+
+  @@unique([userId, groupId]) // Garante que um usuário só pode entrar no mesmo grupo uma vez
+}

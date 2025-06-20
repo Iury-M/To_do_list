@@ -1,0 +1,28 @@
+# Arquivos de Sistema
+.DS_Store
+*.log
+npm-debug.log*
+
+# Dependências
+node_modules/
+*/node_modules/
+
+# Arquivos de Build
+.next/
+*/.next/
+build/
+dist/
+
+# Arquivos de Ambiente
+.env
+.env*.local
+*.env
+
+# Pasta de Uploads
+uploads/
+*/uploads/
+
+# Arquivos do Docker e IDEs
+.dockerignore
+.vscode/
+.idea/
