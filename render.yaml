@@ -9,8 +9,7 @@ services:
     plan: free
     envVars:
       - key: DATABASE_URL
-        postgresql://postgres1:rSjxUGOoqvk0W8lj3dbzbXZ6SDejw87s@dpg-d1al10adbo4c73cjr8r0-a/to_do_list_ywod
-        value: "COLE_AQUI_A_INTERNAL_CONNECTION_STRING_DO_PASSO_2"
+        value: postgresql://postgres1:rSjxUGOoqvk0W8lj3dbzbXZ6SDejw87s@dpg-d1al10adbo4c73cjr8r0-a/to_do_list_ywod
       - key: JWT_SECRET
         sync: false 
       - key: PORT
