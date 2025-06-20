@@ -1,16 +1,20 @@
 services:
-  # 1. Banco de Dados PostgreSQL
+  # 1. Banco de Dados PostgreSQL (com a palavra-chave 'runtime' correta)
   - type: pserv
     name: taskflow-db
-    env: postgres
+    runtime: postgres # <-- A CORREÇÃO ESTÁ AQUI!
     plan: free
 
-  # 2. Serviço de Backend (SEM A SEÇÃO 'disks')
+  # 2. Serviço de Backend (com a seção 'disks' de volta)
   - type: web
     name: taskflow-backend
     env: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
+    disks:
+      - name: uploads-disk
+        mountPath: /app/uploads
+        sizeGB: 1
     envVars:
       - key: DATABASE_URL
         fromService:
