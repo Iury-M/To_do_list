@@ -1,15 +1,8 @@
-# render.yaml - Versão com indentação corrigida e validada
-
-# A palavra 'services' fica no nível mais alto.
 services:
-
-  # O hífen (-) inicia a definição de um novo serviço.
-  # Tudo abaixo, até o próximo hífen, pertence a este serviço.
   - type: pserv
     name: taskflow-db
     env: postgres
     plan: free 
-    # 'postgresMajorVersion' está corretamente alinhado sob 'pserv'.
     postgresMajorVersion: 14
 
   # Este é o segundo serviço, o backend.
