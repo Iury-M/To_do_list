@@ -1,29 +1,5 @@
-# render.yaml - Versão Final para o Deploy Inicial
+# render.yaml - Teste: Apenas o Frontend
 services:
-  # 1. Banco de Dados PostgreSQL
-  - type: pserv
-    name: taskflow-db
-    runtime: postgres
-    plan: free
-
-  # 2. Serviço de Backend (Seção 'disks' removida)
-  - type: web
-    name: taskflow-backend
-    env: docker
-    plan: free
-    dockerfilePath: ./backend/Dockerfile
-    envVars:
-      - key: DATABASE_URL
-        fromService:
-          type: pserv
-          name: taskflow-db
-          property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: PORT
-        value: 4000
-
-  # 3. Serviço de Frontend
   - type: web
     name: taskflow-frontend
     env: docker
@@ -31,7 +7,4 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: taskflow-backend
-          property: url
+        value: "https://backend-nao-existe.com" # Usando um valor temporário e inválido
