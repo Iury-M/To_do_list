@@ -1,0 +1,47 @@
+services:
+  # Serviço 1: O Banco de Dados PostgreSQL
+  - type: pserv # pserv significa "Private Service" (Serviço Privado)
+    name: taskflow-db
+    env: postgresql
+    plan: free # Define o plano gratuito do Render
+    disk:
+      name: postgres-data
+      sizeGB: 1
+      mountPath: /var/lib/postgresql/data
+
+  # Serviço 2: O Backend em Node.js/Express
+  - type: web
+    name: taskflow-backend
+    env: docker # Diz ao Render para usar nosso Dockerfile
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromService: # Pega a URL de conexão diretamente do serviço do banco
+          type: pserv
+          name: taskflow-db
+          property: connectionString
+      - key: PORT
+        value: 4000
+      - key: JWT_SECRET
+        sync: false # Marcado como segredo, será definido no painel do Render
+
+    # Disco persistente para os arquivos de upload
+    disk:
+      name: taskflow-uploads
+      sizeGB: 1
+      mountPath: /app/uploads # O mesmo caminho que o multer usa
+
+  # Serviço 3: O Frontend em Next.js
+  - type: web
+    name: taskflow-frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService: # Pega a URL pública do nosso backend automaticamente
+          type: web
+          name: taskflow-backend
+          property: url
