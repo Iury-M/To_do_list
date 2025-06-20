@@ -1,37 +1,33 @@
 services:
   # Serviço 1: O Banco de Dados PostgreSQL
-  - type: pserv # pserv significa "Private Service" (Serviço Privado)
+  - type: pserv
     name: taskflow-db
-    env: postgresql
-    plan: free # Define o plano gratuito do Render
-    disk:
-      name: postgres-data
-      sizeGB: 1
-      mountPath: /var/lib/postgresql/data
+    env: postgresql # CORREÇÃO: A chave 'runtime' foi removida, 'env' já define o tipo.
+    plan: free
+    # CORREÇÃO: A propriedade 'disk' foi removida, pois não é suportada no plano gratuito do banco.
+    # O próprio serviço já tem armazenamento persistente (por 90 dias no plano free).
 
   # Serviço 2: O Backend em Node.js/Express
   - type: web
     name: taskflow-backend
-    env: docker # Diz ao Render para usar nosso Dockerfile
+    env: docker
     dockerfilePath: ./backend/Dockerfile
     plan: free
-    healthCheckPath: /
+    healthCheckPath: / # Um caminho para o Render verificar se o serviço está saudável
     envVars:
       - key: DATABASE_URL
-        fromService: # Pega a URL de conexão diretamente do serviço do banco
+        fromService:
           type: pserv
           name: taskflow-db
           property: connectionString
       - key: PORT
         value: 4000
       - key: JWT_SECRET
-        sync: false # Marcado como segredo, será definido no painel do Render
-
-    # Disco persistente para os arquivos de upload
-    disk:
-      name: taskflow-uploads
-      sizeGB: 1
-      mountPath: /app/uploads # O mesmo caminho que o multer usa
+        sync: false # Segredo a ser definido no painel
+      # NOTA: Mais tarde, adicionaremos aqui as chaves da AWS para o S3
+      
+    # CORREÇÃO: A propriedade 'disk' foi removida, pois não é suportada no plano gratuito web.
+    # A lógica de upload será migrada para o S3.
 
   # Serviço 3: O Frontend em Next.js
   - type: web
@@ -41,7 +37,5 @@ services:
     plan: free
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService: # Pega a URL pública do nosso backend automaticamente
-          type: web
-          name: taskflow-backend
-          property: url
+        # CORREÇÃO: A sintaxe para referenciar a URL de outro serviço é com 'value'.
+        value: ${{services.taskflow-backend.url}}
