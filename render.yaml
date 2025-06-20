@@ -1,26 +1,30 @@
-# render.yaml - Versão atualizada para usar seus Dockerfiles
+# render.yaml - Versão com indentação corrigida e validada
+
+# A palavra 'services' fica no nível mais alto.
 services:
-  # 1. Banco de Dados PostgreSQL (Substitui o serviço 'db' do docker-compose)
+
+  # O hífen (-) inicia a definição de um novo serviço.
+  # Tudo abaixo, até o próximo hífen, pertence a este serviço.
   - type: pserv
     name: taskflow-db
     env: postgres
     plan: free 
+    # 'postgresMajorVersion' está corretamente alinhado sob 'pserv'.
     postgresMajorVersion: 14
 
-  # 2. Serviço de Backend (Usa seu backend/Dockerfile)
+  # Este é o segundo serviço, o backend.
   - type: web
     name: taskflow-backend
     env: docker
     plan: free
-    # Caminho para o seu Dockerfile de backend
     dockerfilePath: ./backend/Dockerfile
-    # IMPORTANTE: Este é o comando do seu docker-compose.yml
     startCommand: "sh -c 'npx prisma migrate deploy && npm start'"
-    # Disco persistente para uploads
+    # 'disks' está corretamente alinhado sob 'web'.
     disks:
       - name: uploads-disk
-        mountPath: /app/uploads # O WORKDIR no seu Dockerfile é /app
+        mountPath: /app/uploads
         sizeGB: 1
+    # 'envVars' também está corretamente alinhado sob 'web'.
     envVars:
       - key: DATABASE_URL
         fromService:
@@ -28,16 +32,15 @@ services:
           name: taskflow-db
           property: connectionString
       - key: JWT_SECRET
-        generateValue: true # Render gera um segredo seguro
+        generateValue: true
       - key: PORT
         value: 4000
 
-  # 3. Serviço de Frontend (Usa seu frontend/Dockerfile)
+  # Este é o terceiro serviço, o frontend.
   - type: web
     name: taskflow-frontend
     env: docker
     plan: free
-    # Caminho para o seu Dockerfile de frontend
     dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: NEXT_PUBLIC_API_URL
@@ -45,4 +48,3 @@ services:
           type: web
           name: taskflow-backend
           property: url
-          
