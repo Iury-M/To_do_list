@@ -1,9 +1,11 @@
 services:
   # Serviço 1: O Banco de Dados PostgreSQL
-  - type: pserv 
+  - type: db 
     name: taskflow-db
-    env: postgres 
     plan: free 
+    databaseName: to_do_list
+    postgres:
+      version: 14 
     
   # Serviço 2: O Backend em Node.js/Express
   - type: web
@@ -15,7 +17,7 @@ services:
     envVars:
       - key: DATABASE_URL
         fromService:
-          type: pserv 
+          type: db
           name: taskflow-db
           property: connectionString
       - key: PORT
