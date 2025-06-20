@@ -1,11 +1,7 @@
 services:
-  # Serviço 1: O Banco de Dados PostgreSQL
-  - type: pserv # CORREÇÃO DEFINITIVA: O tipo é 'pserv' (Serviço Privado)...
-    name: taskflow-db
-    env: postgres # ...e o ambiente 'postgres' o define como um banco de dados.
-    plan: free
+  # O BANCO DE DADOS NÃO ESTÁ MAIS AQUI! Nós o criamos manualmente.
 
-  # Serviço 2: O Backend em Node.js/Express
+  # Serviço 1: O Backend
   - type: web
     name: taskflow-backend
     env: docker
@@ -13,14 +9,14 @@ services:
     plan: free
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: pserv # A referência aqui também deve ser 'pserv'
-          name: taskflow-db
-          property: connectionString
+        postgresql://postgres1:rSjxUGOoqvk0W8lj3dbzbXZ6SDejw87s@dpg-d1al10adbo4c73cjr8r0-a/to_do_list_ywod
+        value: "COLE_AQUI_A_INTERNAL_CONNECTION_STRING_DO_PASSO_2"
       - key: JWT_SECRET
-        sync: false # Lembre-se de configurar este segredo no painel do Render
+        sync: false 
+      - key: PORT
+        value: 10000 
 
-  # Serviço 3: O Frontend em Next.js
+  # Serviço 2: O Frontend
   - type: web
     name: taskflow-frontend
     env: docker
