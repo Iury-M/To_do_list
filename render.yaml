@@ -1,29 +1,48 @@
+# render.yaml - Versão atualizada para usar seus Dockerfiles
 services:
-  # O BANCO DE DADOS NÃO ESTÁ MAIS AQUI! Nós o criamos manualmente.
+  # 1. Banco de Dados PostgreSQL (Substitui o serviço 'db' do docker-compose)
+  - type: pserv
+    name: taskflow-db
+    env: postgres
+    plan: free 
+    postgresMajorVersion: 14
 
-  # Serviço 1: O Backend
+  # 2. Serviço de Backend (Usa seu backend/Dockerfile)
   - type: web
     name: taskflow-backend
     env: docker
-    dockerfilePath: ./backend/Dockerfile
     plan: free
+    # Caminho para o seu Dockerfile de backend
+    dockerfilePath: ./backend/Dockerfile
+    # IMPORTANTE: Este é o comando do seu docker-compose.yml
+    startCommand: "sh -c 'npx prisma migrate deploy && npm start'"
+    # Disco persistente para uploads
+    disks:
+      - name: uploads-disk
+        mountPath: /app/uploads # O WORKDIR no seu Dockerfile é /app
+        sizeGB: 1
     envVars:
       - key: DATABASE_URL
-        value: postgresql://postgres1:rSjxUGOoqvk0W8lj3dbzbXZ6SDejw87s@dpg-d1al10adbo4c73cjr8r0-a/to_do_list_ywod
+        fromService:
+          type: pserv
+          name: taskflow-db
+          property: connectionString
       - key: JWT_SECRET
-        sync: false 
+        generateValue: true # Render gera um segredo seguro
       - key: PORT
-        value: 10000 
+        value: 4000
 
-  # Serviço 2: O Frontend
+  # 3. Serviço de Frontend (Usa seu frontend/Dockerfile)
   - type: web
     name: taskflow-frontend
     env: docker
-    dockerfilePath: ./frontend/Dockerfile
     plan: free
+    # Caminho para o seu Dockerfile de frontend
+    dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
           name: taskflow-backend
           property: url
+          
