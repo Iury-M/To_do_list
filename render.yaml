@@ -5,16 +5,12 @@ services:
     env: postgres
     plan: free
 
-  # 2. Serviço de Backend (SEM startCommand)
+  # 2. Serviço de Backend (SEM A SEÇÃO 'disks')
   - type: web
     name: taskflow-backend
     env: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
-    disks:
-      - name: uploads-disk
-        mountPath: /app/uploads
-        sizeGB: 1
     envVars:
       - key: DATABASE_URL
         fromService:
