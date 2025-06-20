@@ -1,20 +1,17 @@
+# render.yaml - Versão Final para o Deploy Inicial
 services:
-  # 1. Banco de Dados PostgreSQL (com a palavra-chave 'runtime' correta)
+  # 1. Banco de Dados PostgreSQL
   - type: pserv
     name: taskflow-db
-    runtime: postgres # <-- A CORREÇÃO ESTÁ AQUI!
+    runtime: postgres
     plan: free
 
-  # 2. Serviço de Backend (com a seção 'disks' de volta)
+  # 2. Serviço de Backend (Seção 'disks' removida)
   - type: web
     name: taskflow-backend
     env: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
-    disks:
-      - name: uploads-disk
-        mountPath: /app/uploads
-        sizeGB: 1
     envVars:
       - key: DATABASE_URL
         fromService:
