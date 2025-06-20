@@ -1,8 +1,7 @@
 services:
-  # 1. Banco de Dados PostgreSQL Gratuito
   - type: pserv
     name: taskflow-db
-    runtime: postgres # Palavra-chave correta
+    runtime: postgres # A palavra-chave correta e essencial
     plan: free
 
   # 2. Backend Node.js Gratuito
