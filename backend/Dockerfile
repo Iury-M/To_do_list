@@ -10,6 +10,7 @@ COPY . .
 
 RUN npx prisma generate
 
+# Estágio 2: Produção
 FROM node:18-alpine
 
 WORKDIR /app
@@ -18,4 +19,4 @@ COPY --from=builder /app .
 
 EXPOSE 4000
 
-CMD ["node", "index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

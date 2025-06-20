@@ -1,23 +1,20 @@
 services:
+  # 1. Banco de Dados PostgreSQL
   - type: pserv
     name: taskflow-db
     env: postgres
-    plan: free 
-    postgresMajorVersion: 14
+    plan: free
 
-  # Este é o segundo serviço, o backend.
+  # 2. Serviço de Backend (SEM startCommand)
   - type: web
     name: taskflow-backend
     env: docker
     plan: free
     dockerfilePath: ./backend/Dockerfile
-    startCommand: "sh -c 'npx prisma migrate deploy && npm start'"
-    # 'disks' está corretamente alinhado sob 'web'.
     disks:
       - name: uploads-disk
         mountPath: /app/uploads
         sizeGB: 1
-    # 'envVars' também está corretamente alinhado sob 'web'.
     envVars:
       - key: DATABASE_URL
         fromService:
@@ -29,7 +26,7 @@ services:
       - key: PORT
         value: 4000
 
-  # Este é o terceiro serviço, o frontend.
+  # 3. Serviço de Frontend
   - type: web
     name: taskflow-frontend
     env: docker
