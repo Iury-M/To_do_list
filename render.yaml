@@ -1,12 +1,10 @@
 services:
   # Serviço 1: O Banco de Dados PostgreSQL
-  - type: db 
+  - type: pserv # CORREÇÃO: O tipo correto é 'pserv' (Serviço Privado)
     name: taskflow-db
+    env: postgres # E o ambiente 'postgres' especifica que é um banco de dados PostgreSQL
     plan: free 
-    databaseName: to_do_list
-    postgres:
-      version: 14 
-    
+
   # Serviço 2: O Backend em Node.js/Express
   - type: web
     name: taskflow-backend
@@ -17,13 +15,13 @@ services:
     envVars:
       - key: DATABASE_URL
         fromService:
-          type: db
+          type: pserv # CORREÇÃO: A referência aqui também deve ser para um 'pserv'
           name: taskflow-db
           property: connectionString
       - key: PORT
         value: 4000
       - key: JWT_SECRET
-        sync: false
+        sync: false # Lembre-se de configurar este segredo no painel do Render
 
   # Serviço 3: O Frontend em Next.js
   - type: web
