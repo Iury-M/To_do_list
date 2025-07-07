@@ -177,5 +177,9 @@ app.post('/tasks/:id/upload', verifyToken, upload.single('file'), async (req, re
   }
 });
 
+app.get('/', (req, res) => {
+  res.status(200).send('Backend is running!');
+});
+
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
