@@ -1,7 +1,5 @@
 FROM node:18-alpine AS builder
 
-ARG NEXT_PUBLIC_API_URL
-
 WORKDIR /app
 
 COPY package*.json ./
@@ -9,7 +7,6 @@ RUN npm install
 
 COPY . .
 
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build
 
 FROM node:18-alpine
