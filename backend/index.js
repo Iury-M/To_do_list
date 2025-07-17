@@ -101,32 +101,47 @@ app.post('/tasks', verifyToken, upload.none(), async (req, res) => {
 });
 
 app.put('/tasks/:id', verifyToken, async (req, res) => {
-  const id = Number(req.params.id);
-  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
-  const taskExists = await prisma.task.findFirst({
-    where: { id, userId: req.user.id },
-  });
+    // Primeiro, encontre a tarefa para saber se ela tem um ficheiro para apagar
+    const taskExists = await prisma.task.findFirst({
+      where: { id, userId: req.user.id },
+    });
 
-  if (!taskExists) return res.status(404).json({ error: 'Tarefa não encontrada ou não pertence ao usuário.' });
+    if (!taskExists) return res.status(404).json({ error: 'Tarefa não encontrada ou não pertence ao utilizador.' });
 
-  const { title, description, done, removeFile, tipoArquivo } = req.body;
+    const { title, description, done, removeFile } = req.body;
 
-  let data = { title, description, done };
+    let data = { title, description, done };
 
-  if (removeFile) {
-    data.fileUrl = null;
-    data.tipoArquivo = null;
-  } else if (tipoArquivo) {
-    data.tipoArquivo = tipoArquivo;
-  }
+    // Se for para remover o ficheiro
+    if (removeFile) {
+      data.fileUrl = null;
+      data.originalFilename = null; // Limpa também os outros campos
+      data.mimeType = null;
 
-  const task = await prisma.task.update({
-    where: { id },
-    data,
-  });
+      // Lógica para apagar o ficheiro da S3 (se existir)
+      if (taskExists.fileUrl && taskExists.fileUrl.includes('s3.amazonaws.com')) {
+        const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+        const s3 = new S3Client({ region: process.env.AWS_REGION });
+        const bucketName = process.env.AWS_BUCKET_NAME;
+        const fileKey = taskExists.fileUrl.split('/').pop(); // Pega o nome do ficheiro da URL
 
-  res.json(task);
+        const deleteParams = {
+          Bucket: bucketName,
+          Key: fileKey,
+        };
+        await s3.send(new DeleteObjectCommand(deleteParams));
+      }
+    }
+
+    const task = await prisma.task.update({
+      where: { id },
+      data,
+    });
+
+    res.json(task);
 });
 
 app.delete('/tasks/:id', verifyToken, async (req, res) => {
