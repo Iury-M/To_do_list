@@ -19,7 +19,6 @@ if (process.env.AWS_BUCKET_NAME) {
   storage = multerS3({
     s3: s3,
     bucket: process.env.AWS_BUCKET_NAME,
-    acl: 'public-read', // Permite que os ficheiros sejam vistos publicamente
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
