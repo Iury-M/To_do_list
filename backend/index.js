@@ -140,20 +140,21 @@ app.delete('/tasks/:id', verifyToken, async (req, res) => {
 });
 
 app.post('/tasks/:id/upload', verifyToken, upload.single('file'), async (req, res) => {
-  // 1. Verificação de segurança para garantir que um arquivo foi enviado
   if (!req.file) {
-    return res.status(400).json({ error: 'Nenhum arquivo foi enviado ou o tipo de arquivo não é suportado.' });
+    return res.status(400).json({ error: 'Nenhum ficheiro enviado.' });
   }
-
   const { id } = req.params;
-  const fileUrl = `/uploads/${req.file.filename}`;
+
+  // Decide qual URL usar
+  // Para a S3, a localização está em `req.file.location`
+  // Para o local, o caminho está em `req.file.filename`
+  const fileUrl = req.file.location ? req.file.location : `/uploads/${req.file.filename}`;
 
   try {
-    // 2. Atualiza o banco de dados com as informações corretas
     const taskUpdateResult = await prisma.task.updateMany({
       where: {
         id: parseInt(id),
-        userId: req.user.id, // Garante que o usuário só pode atualizar suas próprias tarefas
+        userId: req.user.id,
       },
       data: {
         fileUrl: fileUrl,
@@ -162,18 +163,14 @@ app.post('/tasks/:id/upload', verifyToken, upload.single('file'), async (req, re
       },
     });
 
-    // 3. Verifica se a tarefa realmente foi atualizada
     if (taskUpdateResult.count === 0) {
-      // Isso acontece se a tarefa não existe ou não pertence ao usuário
-      return res.status(404).json({ error: 'Tarefa não encontrada ou não pertence ao usuário.' });
+      return res.status(404).json({ error: 'Tarefa não encontrada ou não pertence ao utilizador.' });
     }
 
-    res.json({ message: 'Arquivo enviado com sucesso!', fileUrl });
-
+    res.json({ message: 'Ficheiro enviado com sucesso!', fileUrl: fileUrl });
   } catch (error) {
-    // 4. Captura qualquer outro erro que possa acontecer
     console.error("Erro no upload da tarefa:", error);
-    res.status(500).json({ error: 'Ocorreu um erro interno ao processar o arquivo.' });
+    res.status(500).json({ error: 'Ocorreu um erro interno ao processar o ficheiro.' });
   }
 });
 
