@@ -116,10 +116,25 @@ export default function GroupPage() {
   
   const renderAttachment = (task) => {
     if (!task.fileUrl) return null;
-    const fullUrl = `http://localhost:4000${task.fileUrl}`;
-    if (task.mimeType?.startsWith('image/')) return <img src={fullUrl} alt={task.originalFilename || 'Anexo'} className="max-h-[50vh] rounded-lg object-contain mx-auto" />;
-    if (task.mimeType?.startsWith('audio/')) return <audio src={fullUrl} controls className="w-full" />;
-    return ( <div className="bg-gray-100 p-4 rounded-lg flex items-center space-x-3 mt-4"><svg className="h-8 w-8 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><a href={fullUrl} download={task.originalFilename} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">Baixar: {task.originalFilename || 'Arquivo Anexo'}</a></div> );
+  
+    // Verifica se a URL já é um link completo (da S3) ou um caminho local
+    const isFullUrl = task.fileUrl.startsWith('http');
+    const fullUrl = isFullUrl ? task.fileUrl : `http://localhost:4000${task.fileUrl}`;
+  
+    if (task.mimeType?.startsWith('image/')) {
+      return <img src={fullUrl} alt={task.originalFilename || 'Anexo'} className="max-h-[50vh] rounded-lg object-contain mx-auto" />;
+    }
+    if (task.mimeType?.startsWith('audio/')) {
+      return <audio src={fullUrl} controls className="w-full" />;
+    }
+    return (
+      <div className="bg-gray-100 p-4 rounded-lg flex items-center space-x-3">
+        <svg className="h-8 w-8 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <a href={fullUrl} download={task.originalFilename} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+          Baixar: {task.originalFilename || 'Arquivo Anexo'}
+        </a>
+      </div>
+    );
   };
 
   if (!group) return <div className="min-h-screen flex items-center justify-center"><p>Carregando...</p></div>;
