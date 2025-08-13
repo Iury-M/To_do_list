@@ -1,9 +1,10 @@
-// CÓDIGO FINAL E COMPLETO PARA: frontend/pages/group/[id].js
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from 'next/link';
 import api from "../../utils/api";
+import io from 'socket.io-client'; 
+
+const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
 
 // 1. O nome do componente foi corrigido para GroupPage
 export default function GroupPage() {
@@ -41,12 +42,30 @@ export default function GroupPage() {
     }
   };
 
-  // 4. O useEffect é chamado quando o `groupId` é definido
   useEffect(() => {
     if (groupId) { // Adicionada verificação para rodar apenas quando groupId estiver disponível
       fetchGroupData();
     }
-  }, [groupId]);
+  }, [groupId, fetchGroupData]);
+
+  useEffect(() => {
+    if (!groupId) return;
+
+    // Junte-se à "sala" do grupo
+    socket.emit('joinGroup', groupId);
+
+    const handleNewTask = (newTask) => {
+      setTasks((currentTasks) => [newTask, ...currentTasks]);
+    };
+
+    socket.on('newTask', handleNewTask);
+
+    // Limpeza: saia do ouvinte quando o componente for desmontado
+    return () => {
+      socket.off('newTask', handleNewTask);
+    };
+  }, [groupId]); 
+
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -60,7 +79,6 @@ export default function GroupPage() {
       setDescription("");
       setFile(null);
       setShowNewTaskForm(false);
-      fetchGroupData();
     } catch (err) {
       alert("Erro ao criar tarefa no grupo.");
     }

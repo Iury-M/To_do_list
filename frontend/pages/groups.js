@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import api from '../utils/api';
+import io from 'socket.io-client'; // 1. Importe o cliente do socket.io
 
 export default function Groups() {
   const router = useRouter();
   const [myGroups, setMyGroups] = useState([]);
   const [invitations, setInvitations] = useState([]);
+  const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
   
   // Estados para o formulário de criação
   const [groupName, setGroupName] = useState('');

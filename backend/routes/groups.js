@@ -5,6 +5,7 @@ const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { verifyToken } = require('../auth'); // Supondo que você exportou de um arquivo de auth
+const { io } = require('../index'); 
 
 // Rota para CRIAR um novo grupo
 router.post('/', verifyToken, async (req, res) => {
@@ -168,7 +169,6 @@ router.post('/:groupId/tasks', verifyToken, async (req, res) => {
         const userId = req.user.id;
         const { title, description } = req.body;
 
-        // 1. Verifica se o usuário é realmente um membro do grupo antes de criar a tarefa
         const membership = await prisma.groupMember.findFirst({
             where: {
                 groupId: groupId,
@@ -181,17 +181,27 @@ router.post('/:groupId/tasks', verifyToken, async (req, res) => {
             return res.status(403).json({ message: "Você não tem permissão para criar tarefas neste grupo." });
         }
 
-        // 2. Cria a tarefa, associando ao grupo e ao usuário que a criou
         const newTask = await prisma.task.create({
             data: {
                 title,
                 description,
-                userId: userId,   // ID de quem criou
-                groupId: groupId, // ID do grupo ao qual pertence
+                userId: userId,
+                groupId: groupId,
+            },
+            // Inclua os dados do utilizador na resposta para o frontend
+            include: {
+                user: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         });
+        
+        // Emita o evento para todos na sala daquele grupo
+        io.to(groupId.toString()).emit('newTask', newTask);
 
-        res.status(201).json(newTask); // Retorna a tarefa criada
+        res.status(201).json(newTask);
     } catch (error) {
         console.error("Erro ao criar tarefa no grupo:", error);
         res.status(500).json({ message: "Erro interno ao criar tarefa." });
