@@ -29,8 +29,9 @@ app.use("/admin", adminRoutes);
 app.use("/api/groups", groupRoutes);
 
 // Rota de Health Check para a Render
-app.get('/', (req, res) => {
-  res.status(200).send('Backend is running!');
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
 // --- ROTAS DE AUTENTICAÇÃO E TAREFAS (o seu código existente) ---
@@ -221,7 +222,4 @@ io.on('connection', (socket) => {
   });
 });
 
-
-// 5. Exporte o `io` e mude app.listen para server.listen
-module.exports.io = io;
 server.listen(port, () => console.log(`Server running on port ${port}`));
