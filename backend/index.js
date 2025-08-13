@@ -28,6 +28,11 @@ app.use('/uploads', express.static('uploads'));
 app.use("/admin", adminRoutes);
 app.use("/api/groups", groupRoutes);
 
+// Rota de Health Check para a Render
+app.get('/', (req, res) => {
+  res.status(200).send('Backend is running!');
+});
+
 // --- ROTAS DE AUTENTICAÇÃO E TAREFAS (o seu código existente) ---
 // (Todo o seu código de rotas /register, /login, /me, /tasks, etc. continua aqui, sem alterações)
 app.post('/register', async (req, res) => {
