@@ -199,8 +199,8 @@ router.post('/:groupId/tasks', verifyToken, async (req, res) => {
         });
         
         // Emita o evento para todos na sala daquele grupo
-        io.to(groupId.toString()).emit('newTask', newTask);
-
+        req.io.to(groupId.toString()).emit('newTask', newTask);
+        
         res.status(201).json(newTask);
     } catch (error) {
         console.error("Erro ao criar tarefa no grupo:", error);
