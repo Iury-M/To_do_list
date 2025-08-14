@@ -99,16 +99,33 @@ app.get('/me', verifyToken, async (req, res) => {
 });
 
 app.get('/tasks', verifyToken, async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = 9;
+  const skip = (page - 1) * pageSize;
+
   const tasks = await prisma.task.findMany({
     where: {
       userId: req.user.id,
       groupId: null 
     },
+    skip: skip,
+    take: pageSize,
     orderBy: {
         createdAt: 'desc'
     }
   });
-  res.json(tasks);
+
+  const totalTasks = await prisma.task.count({
+    where: {
+      userId: req.user.id,
+      groupId: null
+    }
+  });
+
+  res.json({
+    tasks,
+    totalPages: Math.ceil(totalTasks / pageSize)
+  });
 });
 
 app.post('/tasks', verifyToken, upload.none(), async (req, res) => {
