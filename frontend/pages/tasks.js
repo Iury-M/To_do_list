@@ -401,6 +401,24 @@ export default function Tasks() {
           ))}
         </div>
 
+        <div className="flex justify-center items-center mt-8 space-x-4">
+          <button
+            onClick={() => fetchTasks(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <span>Página {currentPage} de {totalPages}</span>
+          <button
+            onClick={() => fetchTasks(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          >
+            Próxima
+          </button>
+        </div>
+
         {/* Modal de Visualização */}
         {viewingTask && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
