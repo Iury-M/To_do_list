@@ -128,14 +128,13 @@ router.get('/:groupId', verifyToken, async (req, res) => {
 router.get('/:groupId/tasks', verifyToken, async (req, res) => {
     try {
         const groupId = parseInt(req.params.groupId);
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = 9;
+        const skip = (page - 1) * pageSize;
 
-        // Verifica se o usuário tem permissão para ver as tarefas deste grupo
+        // ... (o seu código de verificação de membro continua igual) ...
         const membership = await prisma.groupMember.findFirst({
-            where: {
-                groupId: groupId,
-                userId: req.user.id,
-                status: 'ACCEPTED'
-            }
+            where: { groupId, userId: req.user.id, status: 'ACCEPTED' }
         });
 
         if (!membership) {
@@ -144,18 +143,18 @@ router.get('/:groupId/tasks', verifyToken, async (req, res) => {
 
         const tasks = await prisma.task.findMany({
             where: { groupId },
-            include: {
-                user: { // Inclui o nome de quem criou a tarefa
-                    select: {
-                        name: true
-                    }
-                }
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
+            skip: skip,
+            take: pageSize,
+            include: { user: { select: { name: true } } },
+            orderBy: { createdAt: 'desc' }
         });
-        res.json(tasks);
+
+        const totalTasks = await prisma.task.count({ where: { groupId } });
+
+        res.json({
+            tasks,
+            totalPages: Math.ceil(totalTasks / pageSize)
+        });
     } catch (error) {
         res.status(500).json({ message: "Erro ao buscar tarefas do grupo." });
     }
