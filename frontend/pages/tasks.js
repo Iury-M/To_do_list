@@ -18,6 +18,9 @@ export default function Tasks() {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const router = useRouter();
 
   const fetchUser = async () => {
       try {
@@ -39,13 +42,16 @@ export default function Tasks() {
       }
   };
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (page = 1) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await api.get("/tasks", {
+      // Adiciona o parâmetro `page` à chamada da API
+      const res = await api.get(`/tasks?page=${page}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTasks(res.data);
+      setTasks(res.data.tasks); // A resposta agora é um objeto
+      setTotalPages(res.data.totalPages); // Guardamos o total de páginas
+      setCurrentPage(page);
     } catch (err) {
       router.push("/login");
     }
