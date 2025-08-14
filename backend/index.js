@@ -25,13 +25,15 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use("/admin", adminRoutes);
-app.use("/api/groups", groupRoutes);
 
-// Middleware para tornar o `io` acessível nas rotas
+// Middleware para tornar o `io` acessível nas rotas (VEM PRIMEIRO)
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
+
+// As rotas de grupo vêm DEPOIS
+app.use("/api/groups", groupRoutes);
 
 // Rota de Health Check para a Render (A PARTE IMPORTANTE)
 app.get('/', (req, res) => {
