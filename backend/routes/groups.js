@@ -5,7 +5,6 @@ const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { verifyToken } = require('../auth'); // Supondo que você exportou de um arquivo de auth
-const { io } = require('../index'); 
 
 // Rota para CRIAR um novo grupo
 router.post('/', verifyToken, async (req, res) => {
