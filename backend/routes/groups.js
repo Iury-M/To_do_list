@@ -207,4 +207,72 @@ router.post('/:groupId/tasks', verifyToken, async (req, res) => {
     }
 });
 
+// Rota para APAGAR uma tarefa de um grupo
+router.delete('/:groupId/tasks/:taskId', verifyToken, async (req, res) => {
+    const { groupId, taskId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // 1. Verifica se o utilizador é um membro aceite do grupo
+        const membership = await prisma.groupMember.findFirst({
+            where: {
+                groupId: parseInt(groupId),
+                userId: userId,
+                status: 'ACCEPTED'
+            }
+        });
+
+        if (!membership) {
+            return res.status(403).json({ message: "Acesso negado. Você não é membro deste grupo." });
+        }
+
+        // 2. Apaga a tarefa, garantindo que ela pertence ao grupo
+        await prisma.task.delete({
+            where: {
+                id: parseInt(taskId),
+                groupId: parseInt(groupId)
+            }
+        });
+
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao apagar a tarefa.' });
+    }
+});
+
+// Rota para EDITAR uma tarefa de um grupo (incluindo marcar como concluída)
+router.put('/:groupId/tasks/:taskId', verifyToken, async (req, res) => {
+    const { groupId, taskId } = req.params;
+    const userId = req.user.id;
+    const { title, description, done } = req.body;
+
+    try {
+        // 1. Verifica se o utilizador é um membro aceite do grupo
+        const membership = await prisma.groupMember.findFirst({
+            where: {
+                groupId: parseInt(groupId),
+                userId: userId,
+                status: 'ACCEPTED'
+            }
+        });
+
+        if (!membership) {
+            return res.status(403).json({ message: "Acesso negado. Você não é membro deste grupo." });
+        }
+
+        // 2. Atualiza a tarefa
+        const updatedTask = await prisma.task.update({
+            where: {
+                id: parseInt(taskId),
+                groupId: parseInt(groupId)
+            },
+            data: { title, description, done }
+        });
+
+        res.json(updatedTask);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao editar a tarefa.' });
+    }
+});
+
 module.exports = router;
