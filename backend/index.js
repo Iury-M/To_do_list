@@ -7,18 +7,17 @@ const { generateToken, verifyToken } = require('./auth');
 const upload = require('./uploads');
 const adminRoutes = require("./routes/admin");
 const groupRoutes = require("./routes/groups");
-const http = require('http'); // 1. Importar o módulo http
-const { Server } = require("socket.io"); // 2. Importar o Server do socket.io
+const http = require('http');
+const { Server } = require("socket.io");
 
 const app = express();
 const port = process.env.PORT || 4000;
 const prisma = new PrismaClient();
 
-// 3. Criar o servidor HTTP e o servidor Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Permite conexões de qualquer origem
+    origin: "*",
   }
 });
 
@@ -28,14 +27,19 @@ app.use('/uploads', express.static('uploads'));
 app.use("/admin", adminRoutes);
 app.use("/api/groups", groupRoutes);
 
-// Rota de Health Check para a Render
+// Middleware para tornar o `io` acessível nas rotas
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// --- ROTAS DE AUTENTICAÇÃO E TAREFAS (o seu código existente) ---
-// (Todo o seu código de rotas /register, /login, /me, /tasks, etc. continua aqui, sem alterações)
+// Rota de Health Check para a Render (A PARTE IMPORTANTE)
+app.get('/', (req, res) => {
+  res.status(200).send('Backend is running!');
+});
+
+// --- SUAS OUTRAS ROTAS ---
+// (Cole aqui todas as suas outras rotas: /register, /login, /me, /tasks, etc.)
 app.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
@@ -81,7 +85,7 @@ app.get('/me', verifyToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, name: true, email: true, role: true }, // só os dados que quer retornar
+      select: { id: true, name: true, email: true, role: true },
     });
 
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -120,31 +124,28 @@ app.post('/tasks', verifyToken, upload.none(), async (req, res) => {
 app.put('/tasks/:id', verifyToken, async (req, res) => {
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
-  
-    // Primeiro, encontre a tarefa para saber se ela tem um ficheiro para apagar
+
     const taskExists = await prisma.task.findFirst({
       where: { id, userId: req.user.id },
     });
-  
+
     if (!taskExists) return res.status(404).json({ error: 'Tarefa não encontrada ou não pertence ao utilizador.' });
-  
+
     const { title, description, done, removeFile } = req.body;
-  
+
     let data = { title, description, done };
-  
-    // Se for para remover o ficheiro
+
     if (removeFile) {
       data.fileUrl = null;
-      data.originalFilename = null; // Limpa também os outros campos
+      data.originalFilename = null;
       data.mimeType = null;
-  
-      // Lógica para apagar o ficheiro da S3 (se existir)
+
       if (taskExists.fileUrl && taskExists.fileUrl.includes('s3.amazonaws.com')) {
         const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
         const s3 = new S3Client({ region: process.env.AWS_REGION });
         const bucketName = process.env.AWS_BUCKET_NAME;
-        const fileKey = taskExists.fileUrl.split('/').pop(); // Pega o nome do ficheiro da URL
-  
+        const fileKey = taskExists.fileUrl.split('/').pop();
+
         const deleteParams = {
           Bucket: bucketName,
           Key: fileKey,
@@ -152,15 +153,14 @@ app.put('/tasks/:id', verifyToken, async (req, res) => {
         await s3.send(new DeleteObjectCommand(deleteParams));
       }
     }
-  
+
     const task = await prisma.task.update({
       where: { id },
       data,
     });
-  
+
     res.json(task);
 });
-
 
 app.delete('/tasks/:id', verifyToken, async (req, res) => {
   await prisma.task.deleteMany({
@@ -172,16 +172,12 @@ app.delete('/tasks/:id', verifyToken, async (req, res) => {
   res.status(204).send();
 });
 
-// Rota de upload de ficheiros (agora condicional para S3)
 app.post('/tasks/:id/upload', verifyToken, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Nenhum ficheiro enviado.' });
   }
   const { id } = req.params;
 
-  // Decide qual URL usar
-  // Para a S3, a localização está em `req.file.location`
-  // Para o local, o caminho está em `req.file.filename`
   const fileUrl = req.file.location ? req.file.location : `/uploads/${req.file.filename}`;
 
   try {
@@ -207,13 +203,14 @@ app.post('/tasks/:id/upload', verifyToken, upload.single('file'), async (req, re
     res.status(500).json({ error: 'Ocorreu um erro interno ao processar o ficheiro.' });
   }
 });
+// -------------------------
 
-// 4. Lógica do Socket.IO
+// Lógica do Socket.IO
 io.on('connection', (socket) => {
   console.log('Um utilizador conectou-se via Socket.IO');
 
   socket.on('joinGroup', (groupId) => {
-    socket.join(groupId); // Adiciona o utilizador a uma "sala" com o ID do grupo
+    socket.join(groupId);
     console.log(`Utilizador entrou no grupo: ${groupId}`);
   });
 
