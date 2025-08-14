@@ -109,19 +109,31 @@ export default function GroupPage() {
     }
   };
 
-  const handleToggleDone = async (task, isFromModal = false) => {
-    await api.put(`/tasks/${task.id}`, { done: !task.done }, { headers: { Authorization: `Bearer ${token}` } });
-    if (isFromModal && viewingTask) {
-      setViewingTask({ ...viewingTask, done: !viewingTask.done });
-    }
-    fetchGroupData();
-  };
-
   const handleDelete = async (taskId) => {
-    if (!confirm('Tem certeza que deseja excluir esta tarefa?')) return;
-    await api.delete(`/tasks/${taskId}`, { headers: { Authorization: `Bearer ${token}` } });
-    setViewingTask(null);
-    fetchGroupData();
+    if (!confirm('Tem a certeza de que deseja excluir esta tarefa?')) return;
+    try {
+      await api.delete(`/api/groups/${groupId}/tasks/${taskId}`, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      setViewingTask(null);
+      fetchGroupData();
+    } catch (err) {
+      alert("Erro ao excluir a tarefa.");
+    }
+  };
+  
+  const handleToggleDone = async (task, isFromModal = false) => {
+    try {
+      await api.put(`/api/groups/${groupId}/tasks/${task.id}`, { done: !task.done }, { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      if (isFromModal && viewingTask) {
+        setViewingTask({ ...viewingTask, done: !viewingTask.done });
+      }
+      fetchGroupData();
+    } catch (err) {
+      alert("Erro ao atualizar a tarefa.");
+    }
   };
   
   const filteredTasks = tasks.filter(task => {
