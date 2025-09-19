@@ -88,7 +88,7 @@ export default function Groups() {
                 placeholder="Nome do Grupo"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded bg-white text-gray-900" // Adicione bg-white text-gray-900
                 required
               />
               <input
@@ -96,7 +96,7 @@ export default function Groups() {
                 placeholder="Email do usuário a convidar"
                 value={invitedEmail}
                 onChange={(e) => setInvitedEmail(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded bg-white text-gray-900" // Adicione bg-white text-gray-900
                 required
               />
               {error && <p className="text-red-500 text-sm">{error}</p>}
