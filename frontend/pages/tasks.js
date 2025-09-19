@@ -20,7 +20,6 @@ export default function Tasks() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const router = useRouter();
 
   const fetchUser = async () => {
       try {
