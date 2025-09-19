@@ -304,7 +304,7 @@ export default function Tasks() {
                 <input
                   type="text"
                   placeholder="Título da tarefa"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600 bg-white text-gray-900" // Adicione bg-white text-gray-900
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
@@ -313,7 +313,7 @@ export default function Tasks() {
               <div>
                 <textarea
                   placeholder="Descrição"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600 bg-white text-gray-900" // Adicione bg-white text-gray-900
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows="3"
@@ -540,7 +540,7 @@ export default function Tasks() {
                     <input
                       type="text"
                       placeholder="Editar título"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600 bg-white text-gray-900" // Adicione bg-white text-gray-900
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       required
@@ -549,7 +549,7 @@ export default function Tasks() {
                   <div>
                     <textarea
                       placeholder="Editar descrição"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-600 bg-white text-gray-900" // Adicione bg-white text-gray-900
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
                       rows="3"
